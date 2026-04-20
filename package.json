@@ -1,0 +1,28 @@
+{
+  "name": "app",
+  "version": "1.0.50",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun run --watch src/index.ts",
+    "import:codes": "bun run src/scripts/import-codes.ts"
+  },
+  "dependencies": {
+    "@elysiajs/static": "^1.4.9",
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "elysia": "latest",
+    "elysia-rate-limit": "^4.6.0",
+    "pg": "^8.20.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "tailwindcss": "4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "bun-plugin-tailwind": "^0.1.2",
+    "bun-types": "latest"
+  },
+  "module": "src/index.js"
+}
