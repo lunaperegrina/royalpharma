@@ -100,13 +100,20 @@ import { code } from "./schema"
 - **NUNCA** usar eslint ou prettier em paralelo para o mesmo papel
 - Convenções do guia original: tabs, double quotes, sem semicolons
 
-## 10. Testes
+## 10. Frontend (Tailwind)
+
+- **SEMPRE** usar Tailwind para layout, espaçamento, tipografia, cores, estados visuais e responsividade
+- **NUNCA** criar CSS autoral para componentes ou páginas quando Tailwind resolver o caso
+- Arquivos `.css` devem ficar restritos ao bootstrap do Tailwind e, se indispensável, tokens/globais compatíveis com Tailwind v4
+- Preferir utilitários inline no JSX/TSX ou constantes locais de classes para trechos repetidos
+
+## 11. Testes
 
 - Preferir Vitest para testes de services e utilitários
 - Colocar testes ao lado do código quando fizer sentido
 - Padrão: `describe` / `it` / `beforeEach`
 
-## 11. Estrutura de Pastas
+## 12. Estrutura de Pastas
 
 Estrutura atual:
 

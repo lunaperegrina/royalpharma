@@ -61,8 +61,41 @@ const initialFormState: VerifyCodeForm = {
 	code: "",
 }
 
+const validationSteps: ReadonlyArray<{ key: ValidationStep; label: string }> = [
+	{ key: "identify", label: "1. Identificar" },
+	{ key: "code", label: "2. Inserir codigo" },
+	{ key: "confirm", label: "3. Confirmar" },
+	{ key: "success", label: "4. Produto validado" },
+]
+
 const uuidPattern =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+const kickerClass =
+	"text-[0.74rem] font-black uppercase tracking-[0.22em] text-[#0f7a5a]"
+
+const bodyTextClass = "text-base leading-7 text-[#5b6d66]"
+
+const cardClass =
+	"relative rounded-[28px] border border-[rgba(28,53,45,0.12)] bg-[rgba(255,251,245,0.86)] p-5 shadow-[0_18px_50px_rgba(71,60,34,0.08)] sm:p-6 sm:rounded-[32px]"
+
+const cardHeadingClass = "grid gap-2.5"
+
+const labelClass = "grid gap-2"
+
+const labelTextClass = "text-[0.9rem] font-bold text-[#173228]"
+
+const inputClass =
+	"w-full rounded-[18px] border border-[rgba(28,53,45,0.12)] bg-[rgba(255,255,255,0.8)] px-[18px] py-4 text-[#173228] transition duration-150 placeholder:text-[#7b8b84] focus:-translate-y-px focus:border-[rgba(15,122,90,0.42)] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[rgba(15,122,90,0.12)] disabled:cursor-not-allowed disabled:opacity-70"
+
+const buttonBaseClass =
+	"min-h-[54px] rounded-full px-[18px] py-[14px] text-sm font-extrabold transition duration-150 disabled:cursor-wait disabled:opacity-70 enabled:hover:-translate-y-px"
+
+const primaryButtonClass = `${buttonBaseClass} bg-linear-[135deg,#0f7a5a,#09553e] text-white shadow-[0_14px_26px_rgba(15,122,90,0.22)]`
+
+const secondaryButtonClass = `${buttonBaseClass} bg-linear-[135deg,#cab06d,#a88a42] text-[#fffdf8] shadow-[0_14px_24px_rgba(168,138,66,0.2)]`
+
+const ghostButtonClass = `${buttonBaseClass} border border-[rgba(28,53,45,0.24)] bg-[rgba(255,255,255,0.5)] text-[#173228] shadow-none`
 
 function getInitialContext(): InitialContext {
 	const searchParams = new URLSearchParams(window.location.search)
@@ -306,7 +339,7 @@ export function App() {
 		setIsConfirmOpen(true)
 	}
 
-async function handleConfirmValidation() {
+	async function handleConfirmValidation() {
 		setIsSubmitting(true)
 		setFeedback(null)
 
@@ -373,190 +406,235 @@ async function handleConfirmValidation() {
 				: "Origem: link ou QR Code"
 		: "Use NFC ou preencha manualmente."
 
+	const feedbackClass =
+		feedback?.kind === "success"
+			? "mt-5 rounded-[18px] bg-[rgba(19,125,83,0.14)] px-4 py-[14px] font-bold text-[#126b49]"
+			: "mt-5 rounded-[18px] bg-[rgba(182,57,35,0.12)] px-4 py-[14px] font-bold text-[#a63d24]"
+
 	return (
-		<main className="page-shell">
-			<section className="experience-card">
-				<div className="hero-panel">
-					<div className="hero-copy">
-						<p className="eyebrow">Royal Pharma</p>
-						<h1>Validacao inteligente do produto</h1>
-						<p className="hero-text">
-							Acesse a validacao do produto, identifique o cartao NFC e
-							complete a confirmacao com o codigo unico abaixo do QR Code.
-						</p>
-					</div>
+		<main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(208,156,66,0.2),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(15,122,90,0.18),transparent_34%),linear-gradient(180deg,#f4eddf_0%,#efe7d8_100%)] font-[Avenir_Next,Trebuchet_MS,Segoe_UI,sans-serif] text-[#173228]">
+			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.18),rgba(255,255,255,0.18)),repeating-linear-gradient(135deg,rgba(23,50,40,0.015)_0,rgba(23,50,40,0.015)_2px,transparent_2px,transparent_12px)]" />
 
-					<div className="signal-panel">
-						<p className="signal-label">{identifyStatusLabel}</p>
-						<p className="signal-value">
-							{form.uuid.trim() || "Aproxime o cartao ou informe o identificador"}
-						</p>
-						<p className="signal-caption">{sourceLabel}</p>
-					</div>
-				</div>
+			<div className="relative grid min-h-screen place-items-center p-4 sm:p-6">
+				<section className="relative w-full max-w-[1080px] overflow-hidden rounded-[28px] border border-[rgba(28,53,45,0.12)] bg-[rgba(255,252,247,0.86)] p-5 shadow-[0_28px_80px_rgba(48,43,26,0.12),inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-[18px] sm:rounded-[34px] sm:p-8 lg:p-10">
+					<div className="pointer-events-none absolute inset-3 rounded-[20px] border border-[rgba(191,161,96,0.16)] sm:inset-[18px] sm:rounded-[26px]" />
 
-				<ol className="step-strip" aria-label="Etapas da validacao">
-					{[
-						{ key: "identify", label: "1. Identificar" },
-						{ key: "code", label: "2. Inserir codigo" },
-						{ key: "confirm", label: "3. Confirmar" },
-						{ key: "success", label: "4. Produto validado" },
-					].map((step) => {
-						const isActive = currentStep === step.key
-						const isComplete =
-							(step.key === "identify" && Boolean(form.uuid.trim())) ||
-							(step.key === "code" &&
-								(Boolean(form.uuid.trim()) || isConfirmOpen || isSuccessLocked)) ||
-							(step.key === "confirm" && (isConfirmOpen || isSuccessLocked)) ||
-							(step.key === "success" && isSuccessLocked)
-
-						return (
-							<li
-								key={step.key}
-								className={`step-chip${isActive ? " step-chip-active" : ""}${isComplete ? " step-chip-complete" : ""}`}
-							>
-								{step.label}
-							</li>
-						)
-					})}
-				</ol>
-
-				<div className="content-grid">
-					<section className="flow-card flow-card-accent">
-						<div className="card-heading">
-							<p className="section-kicker">Etapa 1</p>
-							<h2>Aproxime o cartao NFC</h2>
-							<p>
-								No iPhone, o cartao pode abrir esta pagina com o identificador.
-								No Android, voce tambem pode ler o cartao aqui.
+					<div className="relative grid gap-5 pb-7 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.8fr)] lg:items-start">
+						<div className="max-w-[680px]">
+							<p className={kickerClass}>Royal Pharma</p>
+							<h1 className="max-w-[10ch] font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.95] font-bold tracking-[-0.03em] max-[480px]:max-w-none">
+								Validacao inteligente do produto
+							</h1>
+							<p className={`mt-4 ${bodyTextClass}`}>
+								Acesse a validacao do produto, identifique o cartao NFC e
+								complete a confirmacao com o codigo unico abaixo do QR Code.
 							</p>
 						</div>
 
-						<div className="nfc-actions">
+						<div className="rounded-[24px] border border-[rgba(15,122,90,0.16)] bg-[linear-gradient(135deg,rgba(255,255,255,0.8),rgba(240,248,243,0.72))] p-[20px] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+							<p className={kickerClass}>{identifyStatusLabel}</p>
+							<p className="mt-2 text-base font-bold break-words">
+								{form.uuid.trim() || "Aproxime o cartao ou informe o identificador"}
+							</p>
+							<p className="mt-2 text-[0.92rem] leading-6 text-[#5b6d66]">
+								{sourceLabel}
+							</p>
+						</div>
+					</div>
+
+					<ol
+						className="relative mb-7 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4"
+						aria-label="Etapas da validacao"
+					>
+						{validationSteps.map((step) => {
+							const isActive = currentStep === step.key
+							const isComplete =
+								(step.key === "identify" && Boolean(form.uuid.trim())) ||
+								(step.key === "code" &&
+									(Boolean(form.uuid.trim()) || isConfirmOpen || isSuccessLocked)) ||
+								(step.key === "confirm" && (isConfirmOpen || isSuccessLocked)) ||
+								(step.key === "success" && isSuccessLocked)
+
+							const stepClass = [
+								"rounded-full border px-[14px] py-3 text-center text-[0.88rem] font-bold transition duration-150",
+								"border-[rgba(28,53,45,0.12)] bg-[rgba(255,255,255,0.5)] text-[#5b6d66]",
+								isActive
+									? "-translate-y-px border-[rgba(15,122,90,0.35)] bg-[rgba(15,122,90,0.12)] text-[#09553e]"
+									: "",
+								isComplete
+									? "border-[rgba(15,122,90,0.28)] text-[#09553e]"
+									: "",
+							]
+								.filter(Boolean)
+								.join(" ")
+
+							return (
+								<li key={step.key} className={stepClass}>
+									{step.label}
+								</li>
+							)
+						})}
+					</ol>
+
+					<div className="relative grid gap-5 lg:grid-cols-2">
+						<section
+							className={`${cardClass} bg-[radial-gradient(circle_at_top_right,rgba(15,122,90,0.12),transparent_36%),rgba(255,251,245,0.92)]`}
+						>
+							<div className={`${cardHeadingClass} mb-[22px]`}>
+								<p className={kickerClass}>Etapa 1</p>
+								<h2 className="font-serif text-[clamp(1.5rem,3vw,2.1rem)] leading-none font-bold tracking-[-0.03em]">
+									Aproxime o cartao NFC
+								</h2>
+								<p className={bodyTextClass}>
+									No iPhone, o cartao pode abrir esta pagina com o identificador.
+									No Android, voce tambem pode ler o cartao aqui.
+								</p>
+							</div>
+
+							<div className="grid gap-3.5">
+								<button
+									type="button"
+									className={primaryButtonClass}
+									onClick={handleScanNfc}
+									disabled={isScanning || isSuccessLocked}
+								>
+									{isScanning ? "Lendo cartao NFC..." : "Ler cartao NFC"}
+								</button>
+								<p className={bodyTextClass}>
+									{supportsWebNfc
+										? nfcHint
+										: "Leitura NFC no navegador disponivel apenas em dispositivos compativeis e com HTTPS."}
+								</p>
+							</div>
+
+							<div className="mt-5 grid gap-3.5 border-t border-[rgba(28,53,45,0.08)] pt-5">
+								<p className={kickerClass}>Fallback manual</p>
+								<label className={labelClass}>
+									<span className={labelTextClass}>Identificador do produto</span>
+									<input
+										name="uuid"
+										value={form.uuid}
+										onChange={(event) => handleUuidChange(event.currentTarget.value)}
+										placeholder="00000000-0000-0000-0000-000000000000"
+										autoComplete="off"
+										disabled={isSuccessLocked}
+										className={inputClass}
+									/>
+								</label>
+							</div>
+						</section>
+
+						<section className={cardClass}>
+							<div className={`${cardHeadingClass} mb-[22px]`}>
+								<p className={kickerClass}>Etapa 2</p>
+								<h2 className="font-serif text-[clamp(1.5rem,3vw,2.1rem)] leading-none font-bold tracking-[-0.03em]">
+									Digite o codigo abaixo do QR Code
+								</h2>
+								<p className={bodyTextClass}>
+									Depois de identificar o produto, informe o codigo unico de
+									validacao para seguir para a confirmacao final.
+								</p>
+							</div>
+
+							<form className="grid gap-3.5" onSubmit={handleContinue}>
+								<label className={labelClass}>
+									<span className={labelTextClass}>Codigo unico de validacao</span>
+									<input
+										name="code"
+										value={form.code}
+										onChange={(event) => updateField("code", event.currentTarget.value)}
+										placeholder="Digite o codigo impresso"
+										autoComplete="off"
+										disabled={!form.uuid.trim() || isSuccessLocked}
+										className={inputClass}
+									/>
+								</label>
+
+								<button
+									type="submit"
+									className={secondaryButtonClass}
+									disabled={isConfirmDisabled}
+								>
+									Confirmar validacao
+								</button>
+							</form>
+
+							<p className={`mt-3.5 ${bodyTextClass}`}>
+								{form.uuid.trim()
+									? "Produto identificado. Revise o codigo e avance para a confirmacao."
+									: "Primeiro identifique o produto para liberar a validacao."}
+							</p>
+						</section>
+					</div>
+
+					{feedback ? (
+						<p className={feedbackClass}>{feedback.message}</p>
+					) : null}
+
+					{isSuccessLocked ? (
+						<section className={`${cardClass} mt-5 grid gap-3 border-[rgba(15,122,90,0.24)] bg-[radial-gradient(circle_at_top_right,rgba(15,122,90,0.12),transparent_28%),rgba(245,252,248,0.94)]`}>
+							<p className={kickerClass}>Concluido</p>
+							<h2 className="font-serif text-[clamp(1.5rem,3vw,2.1rem)] leading-none font-bold tracking-[-0.03em]">
+								Produto validado com sucesso
+							</h2>
+							<p className={bodyTextClass}>
+								O codigo foi consumido com seguranca. Use esta mesma identificacao
+								apenas se precisar validar outro item.
+							</p>
 							<button
 								type="button"
-								className="primary-button"
-								onClick={handleScanNfc}
-								disabled={isScanning || isSuccessLocked}
+								className={primaryButtonClass}
+								onClick={resetForAnotherValidation}
 							>
-								{isScanning ? "Lendo cartao NFC..." : "Ler cartao NFC"}
+								Validar outro produto
 							</button>
-							<p className="support-copy">
-								{supportsWebNfc
-									? nfcHint
-									: "Leitura NFC no navegador disponivel apenas em dispositivos compativeis e com HTTPS."}
-							</p>
-						</div>
-
-						<div className="manual-entry">
-							<p className="manual-label">Fallback manual</p>
-							<label className="field">
-								<span>Identificador do produto</span>
-								<input
-									name="uuid"
-									value={form.uuid}
-									onChange={(event) => handleUuidChange(event.currentTarget.value)}
-									placeholder="00000000-0000-0000-0000-000000000000"
-									autoComplete="off"
-									disabled={isSuccessLocked}
-								/>
-							</label>
-						</div>
-					</section>
-
-					<section className="flow-card">
-						<div className="card-heading">
-							<p className="section-kicker">Etapa 2</p>
-							<h2>Digite o codigo abaixo do QR Code</h2>
-							<p>
-								Depois de identificar o produto, informe o codigo unico de
-								validacao para seguir para a confirmacao final.
-							</p>
-						</div>
-
-						<form className="verify-form" onSubmit={handleContinue}>
-							<label className="field">
-								<span>Codigo unico de validacao</span>
-								<input
-									name="code"
-									value={form.code}
-									onChange={(event) => updateField("code", event.currentTarget.value)}
-									placeholder="Digite o codigo impresso"
-									autoComplete="off"
-									disabled={!form.uuid.trim() || isSuccessLocked}
-								/>
-							</label>
-
-							<button
-								type="submit"
-								className="secondary-button"
-								disabled={isConfirmDisabled}
-							>
-								Confirmar validacao
-							</button>
-						</form>
-
-						<p className="support-copy">
-							{form.uuid.trim()
-								? "Produto identificado. Revise o codigo e avance para a confirmacao."
-								: "Primeiro identifique o produto para liberar a validacao."}
-						</p>
-					</section>
-				</div>
-
-				{feedback ? (
-					<p className={`feedback feedback-${feedback.kind}`}>{feedback.message}</p>
-				) : null}
-
-				{isSuccessLocked ? (
-					<section className="success-card">
-						<p className="section-kicker">Concluido</p>
-						<h2>Produto validado com sucesso</h2>
-						<p>
-							O codigo foi consumido com seguranca. Use esta mesma identificacao
-							apenas se precisar validar outro item.
-						</p>
-						<button
-							type="button"
-							className="primary-button"
-							onClick={resetForAnotherValidation}
-						>
-							Validar outro produto
-						</button>
-					</section>
-				) : null}
-			</section>
+						</section>
+					) : null}
+				</section>
+			</div>
 
 			{isConfirmOpen ? (
-				<div className="modal-backdrop" role="presentation">
+				<div
+					className="fixed inset-0 z-10 grid place-items-center bg-[rgba(17,28,24,0.48)] p-5 backdrop-blur-[8px]"
+					role="presentation"
+				>
 					<section
-						className="confirm-modal"
+						className={`${cardClass} w-full max-w-[520px] bg-[rgba(255,249,241,0.98)]`}
 						role="dialog"
 						aria-modal="true"
 						aria-labelledby="confirm-title"
 					>
-						<p className="section-kicker">Etapa 3</p>
-						<h2 id="confirm-title">Queimar codigo unico de validacao</h2>
-						<p className="confirm-copy">
+						<p className={kickerClass}>Etapa 3</p>
+						<h2
+							id="confirm-title"
+							className="mt-1 font-serif text-[clamp(1.5rem,3vw,2.1rem)] leading-none font-bold tracking-[-0.03em]"
+						>
+							Queimar codigo unico de validacao
+						</h2>
+						<p className={`mt-4 ${bodyTextClass}`}>
 							Ao confirmar, este codigo sera validado e nao podera ser usado
 							novamente.
 						</p>
 
-						<div className="confirm-summary">
+						<div className="my-[22px] grid gap-[14px] rounded-[20px] border border-[rgba(28,53,45,0.08)] bg-[rgba(255,255,255,0.82)] p-[18px]">
 							<div>
-								<span>Identificador</span>
-								<strong>{form.uuid.trim()}</strong>
+								<span className="mb-1.5 block text-[0.82rem] font-bold uppercase tracking-[0.08em] text-[#5b6d66]">
+									Identificador
+								</span>
+								<strong className="text-base break-words">{form.uuid.trim()}</strong>
 							</div>
 							<div>
-								<span>Codigo informado</span>
-								<strong>{form.code.trim()}</strong>
+								<span className="mb-1.5 block text-[0.82rem] font-bold uppercase tracking-[0.08em] text-[#5b6d66]">
+									Codigo informado
+								</span>
+								<strong className="text-base break-words">{form.code.trim()}</strong>
 							</div>
 						</div>
 
-						<div className="modal-actions">
+						<div className="grid gap-3 md:grid-cols-2">
 							<button
 								type="button"
-								className="ghost-button"
+								className={ghostButtonClass}
 								onClick={() => setIsConfirmOpen(false)}
 								disabled={isSubmitting}
 							>
@@ -564,7 +642,7 @@ async function handleConfirmValidation() {
 							</button>
 							<button
 								type="button"
-								className="primary-button"
+								className={primaryButtonClass}
 								onClick={handleConfirmValidation}
 								disabled={isSubmitting}
 							>
